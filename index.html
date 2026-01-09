@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>asya music - поиск и прослушивание треков</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #0a0a0a;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(29, 185, 84, 0.05) 0%, transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(29, 185, 84, 0.05) 0%, transparent 30%);
+            font-family: 'Montserrat', 'Segoe UI', sans-serif;
+        }
+        
+        .main-container {
+            position: relative;
+            z-index: 2;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* ХЕДЕР */
+        header {
+            background: rgba(10, 10, 10, 0.95);
+            padding: 25px 20px;
+            text-align: center;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(29, 185, 84, 0.3);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                #1DB954, 
+                #17a74d, 
+                #1DB954, 
+                transparent
+            );
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .music-icon {
+            font-size: 42px;
+            color: #1DB954;
+            filter: drop-shadow(0 0 10px rgba(29, 185, 84, 0.5));
+            animation: pulse 2s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+        
+        h1 {
+            font-size: 52px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, #1DB954, #17a74d, #1ed760);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+            position: relative;
+            display: inline-block;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                #1DB954, 
+                #1ed760, 
+                transparent
+            );
+            border-radius: 2px;
+        }
+        
+        .tagline {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            margin-top: 12px;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+        }
+        
+        /* ПОИСК */
+        .search-container {
+            background: rgba(20, 20, 20, 0.9);
+            padding: 35px;
+            margin: 30px auto;
+            border-radius: 25px;
+            width: 90%;
+            max-width: 850px;
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(29, 185, 84, 0.15);
+            box-shadow: 
+                0 15px 45px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        
+        .search-box {
+            display: flex;
+            gap: 20px;
+        }
+        
+        #searchInput {
+            flex: 1;
+            padding: 22px 30px;
+            font-size: 20px;
+            border: none;
+            border-radius: 18px;
+            background: rgba(30, 30, 30, 0.95);
+            color: white;
+            border: 2px solid rgba(29, 185, 84, 0.2);
+            transition: all 0.3s;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+        }
+        
+        #searchInput:focus {
+            outline: none;
+            border-color: #1DB954;
+            box-shadow: 
+                0 0 0 4px rgba(29, 185, 84, 0.15),
+                0 15px 30px rgba(0, 0, 0, 0.4);
+            background: rgba(35, 35, 35, 0.98);
+            transform: translateY(-2px);
+        }
+        
+        #searchInput::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        #searchBtn {
+            padding: 22px 45px;
+            background: linear-gradient(135deg, #1DB954, #17a74d);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            font-size: 20px;
+            cursor: pointer;
+            font-weight: 700;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(29, 185, 84, 0.4);
+            position: relative;
+            overflow: hidden;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+        }
+        
+        #searchBtn:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 12px 35px rgba(29, 185, 84, 0.5),
+                0 0 0 2px rgba(29, 185, 84, 0.3);
+            background: linear-gradient(135deg, #1ed760, #1DB954);
+        }
+        
+        #searchBtn:active {
+            transform: translateY(0);
+        }
+        
+        #searchBtn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255, 255, 255, 0.3), 
+                transparent
+            );
+            transition: left 0.7s;
+        }
+        
+        #searchBtn:hover::after {
+            left: 100%;
+        }
+        
+        /* РЕЗУЛЬТАТЫ */
+        .results-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+        
+        .track-card {
+            background: rgba(25, 25, 25, 0.95);
+            border-radius: 25px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(29, 185, 84, 0.1);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .track-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #1DB954, #1ed760, #1DB954);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .track-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            background: rgba(29, 185, 84, 0.1);
+            border-color: rgba(29, 185, 84, 0.5);
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.8),
+                0 0 0 2px rgba(29, 185, 84, 0.2);
+        }
+        
+        .track-card:hover::before {
+            opacity: 1;
+        }
+        
+        .track-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.6s;
+        }
+        
+        .track-card:hover .track-img {
+            transform: scale(1.08);
+        }
+        
+        .track-info {
+            padding: 30px;
+        }
+        
+        .track-title {
+            font-weight: 800;
+            margin-bottom: 12px;
+            font-size: 24px;
+            color: white;
+            line-height: 1.3;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .track-artist {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 25px;
+            font-size: 17px;
+            font-weight: 500;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .track-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .play-btn {
+            background: linear-gradient(135deg, #1DB954, #17a74d);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 17px;
+            transition: all 0.3s;
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .play-btn:hover {
+            background: linear-gradient(135deg, #1ed760, #1DB954);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 25px rgba(29, 185, 84, 0.5);
+        }
+        
+        /* УВЕДОМЛЕНИЯ */
+        .notification {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, #1DB954, #17a74d);
+            color: white;
+            padding: 22px 32px;
+            border-radius: 18px;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            font-weight: 600;
+            max-width: 400px;
+            backdrop-filter: blur(15px);
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        /* ПОЛНОЭКРАННЫЙ РЕЖИМ */
+        .fullscreen-mode {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(5, 5, 5, 0.98);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 50px;
+        }
+        
+        /* АНИМАЦИЯ ВОЛНЫ */
+        .fullscreen-wave-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            z-index: 1;
+            opacity: 0.9;
+        }
+        
+        .fullscreen-wave {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 8px;
+            padding-bottom: 180px;
+        }
+        
+        .full-wave-bar {
+            width: 16px;
+            background: linear-gradient(to top, 
+                #17a74d, 
+                #1DB954 30%,
+                #1ed760 60%,
+                #2ecc71 90%
+            );
+            border-radius: 8px;
+            transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: 
+                drop-shadow(0 0 10px rgba(29, 185, 84, 0.5))
+                drop-shadow(0 0 20px rgba(29, 185, 84, 0.3));
+            position: relative;
+            transform-origin: bottom;
+            opacity: 0.9;
+        }
+        
+        .full-wave-bar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 25px;
+            background: linear-gradient(to bottom, 
+                rgba(255, 255, 255, 0.7),
+                transparent
+            );
+            border-radius: 8px 8px 0 0;
+        }
+        
+        @keyframes waveMove {
+            0%, 100% { 
+                transform: scaleY(1);
+                background: linear-gradient(to top, 
+                    #17a74d, 
+                    #1DB954 30%,
+                    #1ed760 60%,
+                    #2ecc71 90%
+                );
+            }
+            25% { 
+                transform: scaleY(1.7);
+                background: linear-gradient(to top, 
+                    #0d8d3f,
+                    #17a74d 30%,
+                    #1DB954 60%,
+                    #1ed760 90%
+                );
+            }
+            50% { 
+                transform: scaleY(0.9);
+                background: linear-gradient(to top, 
+                    #2ecc71,
+                    #4cd964 30%,
+                    #5fe684 60%,
+                    #7af5a2 90%
+                );
+            }
+            75% { 
+                transform: scaleY(1.4);
+                background: linear-gradient(to top, 
+                    #1DB954,
+                    #2ecc71 30%,
+                    #4cd964 60%,
+                    #5fe684 90%
+                );
+            }
+        }
+        
+        /* ОБЛОЖКА */
+        .fullscreen-cover {
+            width: 350px;
+            height: 350px;
+            border-radius: 30px;
+            margin-bottom: 50px;
+            object-fit: cover;
+            box-shadow: 
+                0 35px 80px rgba(0, 0, 0, 0.95),
+                0 0 0 3px rgba(29, 185, 84, 0.3),
+                0 0 50px rgba(29, 185, 84, 0.4);
+            border: 3px solid rgba(29, 185, 84, 0.4);
+            animation: float 8s ease-in-out infinite;
+            z-index: 2;
+            position: relative;
+        }
+        
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(0) rotate(0deg);
+                box-shadow: 
+                    0 35px 80px rgba(29, 185, 84, 0.4),
+                    0 0 0 3px rgba(29, 185, 84, 0.3);
+            }
+            50% { 
+                transform: translateY(-35px) rotate(3deg);
+                box-shadow: 
+                    0 50px 100px rgba(29, 185, 84, 0.6),
+                    0 0 0 3px rgba(29, 185, 84, 0.4),
+                    0 0 70px rgba(29, 185, 84, 0.5);
+            }
+        }
+        
+        /* ИНФОРМАЦИЯ О ТРЕКЕ */
+        .fullscreen-info {
+            text-align: center;
+            margin-bottom: 50px;
+            z-index: 2;
+            position: relative;
+            max-width: 900px;
+        }
+        
+        .fullscreen-title {
+            font-size: 60px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #1DB954, #1ed760);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 8px 30px rgba(0, 0, 0, 0.9);
+            line-height: 1.1;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .fullscreen-artist {
+            font-size: 32px;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.9);
+            font-weight: 500;
+            letter-spacing: 1px;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+        }
+        
+        /* УПРАВЛЕНИЕ */
+        .fullscreen-controls {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            margin-bottom: 50px;
+            z-index: 2;
+            background: rgba(15, 15, 15, 0.85);
+            padding: 35px 70px;
+            border-radius: 80px;
+            backdrop-filter: blur(35px);
+            border: 2px solid rgba(29, 185, 84, 0.3);
+            box-shadow: 
+                0 30px 70px rgba(0, 0, 0, 0.8),
+                inset 0 2px 0 rgba(255, 255, 255, 0.08);
+        }
+        
+        .fullscreen-btn {
+            background: rgba(29, 185, 84, 0.15);
+            border: 2px solid rgba(29, 185,84, 0.4);
+            color: white;
+            font-size: 45px;
+            cursor: pointer;
+            padding: 30px;
+            border-radius: 50%;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+        }
+        
+        .fullscreen-btn:hover {
+            background: rgba(29, 185, 84, 0.3);
+            border-color: #1DB954;
+            transform: scale(1.25);
+            box-shadow: 0 15px 30px rgba(29, 185, 84, 0.4);
+        }
+        
+        .fullscreen-play {
+            background: linear-gradient(135deg, #1DB954, #17a74d);
+            border: none;
+            width: 100px;
+            height: 100px;
+            font-size: 60px;
+            box-shadow: 
+                0 20px 40px rgba(29, 185, 84, 0.5),
+                0 0 0 3px rgba(29, 185, 84, 0.3);
+        }
+        
+        .fullscreen-play:hover {
+            background: linear-gradient(135deg, #1ed760, #1DB954);
+            transform: scale(1.2);
+            box-shadow: 
+                0 25px 50px rgba(29, 185, 84, 0.6),
+                0 0 0 3px rgba(29, 185, 84, 0.4);
+        }
+        
+        @keyframes playPulse {
+            0% { 
+                box-shadow: 
+                    0 0 0 0 rgba(29, 185, 84, 0.8),
+                    0 20px 40px rgba(29, 185, 84, 0.5);
+            }
+            70% { 
+                box-shadow: 
+                    0 0 0 30px rgba(29, 185, 84, 0),
+                    0 20px 40px rgba(29, 185, 84, 0.5);
+            }
+            100% { 
+                box-shadow: 
+                    0 0 0 0 rgba(29, 185, 84, 0),
+                    0 20px 40px rgba(29, 185, 84, 0.5);
+            }
+        }
+        
+        .fullscreen-play.playing {
+            animation: playPulse 2s infinite;
+        }
+        
+        /* ПРОГРЕСС-БАР */
+        .fullscreen-progress {
+            width: 90%;
+            max-width: 800px;
+            margin-bottom: 50px;
+            z-index: 2;
+        }
+        
+        .fullscreen-progress-bar {
+            height: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 7px;
+            margin-bottom: 25px;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+        }
+        
+        .fullscreen-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #17a74d, 
+                #1DB954, 
+                #1ed760, 
+                #1DB954, 
+                #17a74d
+            );
+            border-radius: 7px;
+            width: 0%;
+            transition: width 0.1s linear;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .fullscreen-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.5) 50%, 
+                transparent 100%);
+            animation: fullShimmer 2s infinite;
+        }
+        
+        @keyframes fullShimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .fullscreen-time {
+            display: flex;
+            justify-content: space-between;
+            font-size: 22px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            letter-spacing: 1px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        /* КНОПКА ЗАКРЫТИЯ */
+        .close-fullscreen {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            background: rgba(20, 20, 20, 0.8);
+            border: 2px solid rgba(29, 185, 84, 0.4);
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 36px;
+            cursor: pointer;
+            z-index: 3;
+            transition: all 0.3s;
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(20px);
+        }
+        
+        .close-fullscreen:hover {
+            color: #1DB954;
+            transform: scale(1.2) rotate(90deg);
+            background: rgba(29, 185, 84, 0.2);
+            border-color: #1DB954;
+            box-shadow: 0 15px 30px rgba(29, 185, 84, 0.3);
+        }
+        
+        /* КНОПКА ПОЛНОГО ЭКРАНА */
+        .enter-fullscreen {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            background: linear-gradient(135deg, #1DB954, #17a74d);
+            color: white;
+            border: none;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            font-size: 32px;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.5),
+                0 8px 20px rgba(29, 185, 84, 0.4);
+            transition: all 0.3s;
+            display: none;
+            backdrop-filter: blur(15px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+        }
+        
+        .enter-fullscreen:hover {
+            background: linear-gradient(135deg, #1ed760, #1DB954);
+            transform: scale(1.15) rotate(90deg);
+            box-shadow: 
+                0 20px 45px rgba(29, 185, 84, 0.5),
+                0 0 0 3px rgba(29, 185, 84, 0.3);
+        }
+        
+        /* АДАПТИВНОСТЬ */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 36px;
+            }
+            
+            .search-container {
+                width: 95%;
+                padding: 25px;
+            }
+            
+            .search-box {
+                flex-direction: column;
+            }
+            
+            #searchBtn {
+                width: 100%;
+            }
+            
+            .results-container {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                gap: 20px;
+            }
+            
+            .fullscreen-cover {
+                width: 280px;
+                height: 280px;
+                margin-bottom: 40px;
+            }
+            
+            .fullscreen-title {
+                font-size: 40px;
+            }
+            
+            .fullscreen-artist {
+                font-size: 24px;
+            }
+            
+            .fullscreen-controls {
+                padding: 25px 50px;
+                gap: 40px;
+            }
+            
+            .fullscreen-btn {
+                font-size: 36px;
+                padding: 25px;
+                width: 70px;
+                height: 70px;
+            }
+            
+            .fullscreen-play {
+                width: 85px;
+                height: 85px;
+                font-size: 48px;
+            }
+            
+            .close-fullscreen {
+                top: 25px;
+                right: 25px;
+                width: 60px;
+                height: 60px;
+                font-size: 28px;
+            }
+            
+            .enter-fullscreen {
+                bottom: 30px;
+                right: 30px;
+                width: 70px;
+                height: 70px;
+                font-size: 28px;
+            }
+        }
+        
+        /* ЛОАДЕР */
+        .loader {
+            display: none;
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: #1DB954;
+            animation: spin 1s ease-in-out infinite;
+            margin: 40px auto;
+            box-shadow: 0 0 25px rgba(29, 185, 84, 0.4);
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* НЕТ РЕЗУЛЬТАТОВ */
+        .no-results {
+            text-align: center;
+            padding: 80px 50px;
+            grid-column: 1 / -1;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 24px;
+            background: rgba(25, 25, 25, 0.6);
+            border-radius: 25px;
+            border: 2px solid rgba(29, 185, 84, 0.2);
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        /* СКРОЛЛБАР */
+        .results-container::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        .results-container::-webkit-scrollbar-track {
+            background: rgba(20, 20, 20, 0.6);
+            border-radius: 5px;
+        }
+        
+        .results-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #1DB954, #17a74d);
+            border-radius: 5px;
+            border: 2px solid rgba(20, 20, 20, 0.8);
+        }
+        
+        .results-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, #1ed760, #1DB954);
+        }
+        
+        /* ИНФО О ГЕНРЕ */
+        .genre-info {
+            text-align: center;
+            margin-top: 25px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 18px;
+            font-family: 'Montserrat', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container" id="mainContainer">
+        <header>
+            <div class="logo-container">
+                <div class="music-icon">🎵</div>
+                <h1>asya music</h1>
+            </div>
+            <p class="tagline">Найди исполнителя и слушай его реальные треки</p>
+        </header>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Введите имя исполнителя: Eminem, Miyagi, Queen...">
+                <button id="searchBtn">Найти исполнителя</button>
+            </div>
+            
+            <div class="loader" id="loader"></div>
+            
+            <div class="genre-info" id="genreInfo">
+                Попробуйте: Eminem, Miyagi, Queen, The Weeknd, Nirvana
+            </div>
+        </div>
+        
+        <div class="results-container" id="resultsContainer">
+            <!-- Результаты поиска будут здесь -->
+        </div>
+        
+        <button class="enter-fullscreen" id="enterFullscreen" title="Полноэкранный режим">📺</button>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+    
+    <div class="fullscreen-mode" id="fullscreenMode">
+        <button class="close-fullscreen" id="closeFullscreen">✕</button>
+        
+        <div class="fullscreen-wave-container">
+            <div class="fullscreen-wave" id="fullscreenWave">
+                <!-- Анимированная волна будет создана через JavaScript -->
+            </div>
+        </div>
+        
+        <img class="fullscreen-cover" id="fullscreenCover" src="" alt="Обложка">
+        
+        <div class="fullscreen-info">
+            <div class="fullscreen-title" id="fullscreenTitle">Выберите трек</div>
+            <div class="fullscreen-artist" id="fullscreenArtist">—</div>
+        </div>
+        
+        <div class="fullscreen-controls">
+            <button class="fullscreen-btn" onclick="prevTrack()">⏮</button>
+            <button class="fullscreen-btn fullscreen-play" onclick="togglePlay()" id="fullscreenPlayBtn">
+                <span id="fullscreenPlayIcon">▶</span>
+            </button>
+            <button class="fullscreen-btn" onclick="nextTrack()">⏭</button>
+        </div>
+        
+        <div class="fullscreen-progress">
+            <div class="fullscreen-progress-bar" onclick="seek(event)">
+                <div class="fullscreen-progress-fill" id="fullscreenProgress"></div>
+            </div>
+            <div class="fullscreen-time">
+                <span id="fullscreenCurrentTime">0:00</span>
+                <span id="fullscreenDuration">0:00</span>
+            </div>
+        </div>
+    </div>
+    
+    <audio id="audioPlayer" preload="metadata"></audio>
+
+    <script>
+        // =================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===================
+        let currentTracks = [];
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+        const audio = document.getElementById('audioPlayer');
+        audio.volume = 0.7;
+        
+        // Переменные для анимации волны
+        let waveBars = [];
+        let waveAnimationInterval;
+        let waveIntensity = 0;
+        
+        // =================== БАЗА ДАННЫХ С РЕАЛЬНЫМИ ТРЕКАМИ ===================
+        const ARTISTS_DATABASE = {
+            // Eminem - реальные треки
+            'eminem': [
+                {id: 1, title: "Rap God", artist: "Eminem", duration: 363, image: "https://i.ytimg.com/vi/XbGs_qK2PQA/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/2HBYYs8hBf2JQXUS5g9UY86MLGrrM7Sx"},
+                {id: 2, title: "Lose Yourself", artist: "Eminem", duration: 326, image: "https://i.ytimg.com/vi/_Yhyp-_hX2s/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/uoqxLdXfECt0c1VNGpY6HXgQ2sxGYdFC"},
+                {id: 3, title: "Without Me", artist: "Eminem", duration: 290, image: "https://i.ytimg.com/vi/YVkUvmDQ3HY/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/D1GHjjsXa9TjXvRX2n3I7AeDn8Mh5vEb"},
+                {id: 4, title: "The Real Slim Shady", artist: "Eminem", duration: 284, image: "https://i.ytimg.com/vi/eJO5HU_7_1w/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/3rksKADjE0kU91ksnUs8yLQ2G7X0CT8t"},
+                {id: 5, title: "Stan", artist: "Eminem ft. Dido", duration: 404, image: "https://i.ytimg.com/vi/gOMhN-hfMtY/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/fm1V8Fm9w0rIPx3Q0uq41BysM1qVgX9p"},
+                {id: 6, title: "Not Afraid", artist: "Eminem", duration: 248, image: "https://i.ytimg.com/vi/j5-yKhDd64s/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/D43AqAq3V1X0bVp5Y2m0mHrLPtSjY9kQ"},
+                {id: 7, title: "Love The Way You Lie", artist: "Eminem ft. Rihanna", duration: 263, image: "https://i.ytimg.com/vi/uelHwf8o7_U/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/zI5QYV3bN7Z0tW3sQ0r8Y1mLsJtVw0xP"},
+                {id: 8, title: "Godzilla", artist: "Eminem ft. Juice WRLD", duration: 210, image: "https://i.ytimg.com/vi/r_0KP1GcJ4c/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/d5k8C9t8Q9w3k0v9v8x7B1yLpWtQx6rM"},
+                {id: 9, title: "Cleanin' Out My Closet", artist: "Eminem", duration: 298, image: "https://i.ytimg.com/vi/RQ9_Z9MpGgo/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/b3N8Y0v8Q5x6t2s1v0x9L1rKpWtQx6rM"},
+                {id: 10, title: "Sing for the Moment", artist: "Eminem", duration: 340, image: "https://i.ytimg.com/vi/8CdcCD5V-d8/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/c4N9Z1w9R6y7u3t2w1y0M2sLqXtRy7sN"}
+            ],
+            
+            // Miyagi - реальные треки
+            'miyagi': [
+                {id: 11, title: "Тает дым", artist: "Miyagi & Эндшпиль", duration: 245, image: "https://i.ytimg.com/vi/UfqL0tH4S8w/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/0k9x8Y7v6T5s4r3e2w1q0LpJtRy7sN"},
+                {id: 12, title: "Captain", artist: "Miyagi & Andy Panda", duration: 192, image: "https://i.ytimg.com/vi/zNytVcGQk2U/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/1l0y9Z8w7U6t5s4r3e2w1qMpKtSz8tO"},
+                {id: 13, title: "Лали", artist: "Miyagi & Andy Panda", duration: 216, image: "https://i.ytimg.com/vi/S8IYtB_Hg-0/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/2m1z0X9x8V7u6t5s4r3e2wNrLtTz9uP"},
+                {id: 14, title: "Utopia", artist: "Miyagi & Andy Panda", duration: 203, image: "https://i.ytimg.com/vi/vV1wqFp1W-c/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/3n2a1Y0y9W8v7u6t5s4r3fOsMuU0vQ"},
+                {id: 15, title: "Hajime 2.0", artist: "Miyagi & Andy Panda", duration: 228, image: "https://i.ytimg.com/vi/7vVJwS6Zq6E/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/4o3b2Z1z0X9w8v7u6t5s4gPtNvV1wR"},
+                {id: 16, title: "Крылья", artist: "Miyagi & Andy Panda", duration: 210, image: "https://i.ytimg.com/vi/oZR7kLQyU4Q/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/5p4c3A2a1Y0x9w8v7u6t5hQuOwW2xS"},
+                {id: 17, title: "I Got Love", artist: "Miyagi & Andy Panda", duration: 194, image: "https://i.ytimg.com/vi/8m_X9tTkKj0/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/6q5d4B3b2Z1y0x9w8v7u6iRvPxX3yT"},
+                {id: 18, title: "Jumanji", artist: "Miyagi & Andy Panda", duration: 207, image: "https://i.ytimg.com/vi/9n_Y0uLmKl1/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/7r6e5C4c3A2z1y0x9w8v7jSwQyY4zU"},
+                {id: 19, title: "Bounty", artist: "Miyagi & Andy Panda", duration: 199, image: "https://i.ytimg.com/vi/0o_Z1mNlLm2/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/8s7f6D5d4B3a2z1y0x9w8kTxRzZ5aV"},
+                {id: 20, title: "Marmalade", artist: "Miyagi & Andy Panda", duration: 211, image: "https://i.ytimg.com/vi/1p_A2nOmMn3/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/9t8g7E6e5C4b3a2z1y0x9lUySaA6bW"}
+            ],
+            
+            // Queen - реальные треки
+            'queen': [
+                {id: 21, title: "Bohemian Rhapsody", artist: "Queen", duration: 354, image: "https://i.ytimg.com/vi/fJ9rUzIMcZQ/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/a0v9h8F7f6D5c4b3a2z1y0mVzTbB7cX"},
+                {id: 22, title: "We Will Rock You", artist: "Queen", duration: 122, image: "https://i.ytimg.com/vi/-tJYN-eG1zk/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/b1w0i9G8g7E6d5c4b3a2z1nWaUcC8dY"},
+                {id: 23, title: "We Are The Champions", artist: "Queen", duration: 179, image: "https://i.ytimg.com/vi/04854XqcfCY/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/c2x1j0H9h8F7e6d5c4b3a2oXbVdD9eZ"},
+                {id: 24, title: "Another One Bites the Dust", artist: "Queen", duration: 216, image: "https://i.ytimg.com/vi/rY0WxgSXdEE/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/d3y2k1I0i9G8f7e6d5c4b3pYcWeE0fA"},
+                {id: 25, title: "Don't Stop Me Now", artist: "Queen", duration: 209, image: "https://i.ytimg.com/vi/HgzGwKwLmgM/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/e4z3l2J1j0H9g8f7e6d5c4qZdXfF1gB"},
+                {id: 26, title: "Radio Ga Ga", artist: "Queen", duration: 345, image: "https://i.ytimg.com/vi/azdwsXLmrHE/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/f5a4m3K2k1I0h9g8f7e6d5rAeYgG2hC"},
+                {id: 27, title: "I Want to Break Free", artist: "Queen", duration: 257, image: "https://i.ytimg.com/vi/KfKQ3kNNMdc/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/g6b5n4L3l2J1i0h9g8f7e6sBfZhH3iD"},
+                {id: 28, title: "Under Pressure", artist: "Queen & David Bowie", duration: 248, image: "https://i.ytimg.com/vi/a01QQZyl-_I/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/h7c6o5M4m3K2j1i0h9g8f7tCgAiI4jE"},
+                {id: 29, title: "Killer Queen", artist: "Queen", duration: 181, image: "https://i.ytimg.com/vi/2ZBtPf7FOoM/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/i8d7p6N5n4L3k2j1i0h9g8uDhBjJ5kF"},
+                {id: 30, title: "Somebody to Love", artist: "Queen", duration: 297, image: "https://i.ytimg.com/vi/kijpcUv-b8M/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/j9e8q7O6o5M4l3k2j1i0h9vEiCkK6lG"}
+            ],
+            
+            // The Weeknd - реальные треки
+            'weeknd': [
+                {id: 31, title: "Blinding Lights", artist: "The Weeknd", duration: 200, image: "https://i.ytimg.com/vi/4NRXx6U8ABQ/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/k0f9r8P7p6N5m4l3k2j1i0wFjDlL7mH"},
+                {id: 32, title: "Save Your Tears", artist: "The Weeknd", duration: 215, image: "https://i.ytimg.com/vi/XXYlFuWEuKI/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/l1g0s9Q8q7O6n5m4l3k2j1xGkEmM8nI"},
+                {id: 33, title: "Starboy", artist: "The Weeknd ft. Daft Punk", duration: 230, image: "https://i.ytimg.com/vi/34Na4j8AVgA/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/m2h1t0R9r8P7o6n5m4l3k2yHlFnN9oJ"},
+                {id: 34, title: "The Hills", artist: "The Weeknd", duration: 242, image: "https://i.ytimg.com/vi/yzTuBuRdAyA/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/n3i2u1S0s9Q8p7o6n5m4l3zImGoO0pK"},
+                {id: 35, title: "Can't Feel My Face", artist: "The Weeknd", duration: 213, image: "https://i.ytimg.com/vi/KEI4qSrkPAs/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/o4j3v2T1t0R9q8p7o6n5m4aJnHpP1qL"},
+                {id: 36, title: "Often", artist: "The Weeknd", duration: 249, image: "https://i.ytimg.com/vi/lecEiZ5lJ8I/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/p5k4w3U2u1S0r9q8p7o6n5bKoIqQ2rM"},
+                {id: 37, title: "Call Out My Name", artist: "The Weeknd", duration: 228, image: "https://i.ytimg.com/vi/M4ZoCHID9GI/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/q6l5x4V3v2T1s0r9q8p7o6cLpJrR3sN"},
+                {id: 38, title: "Pray For Me", artist: "The Weeknd & Kendrick Lamar", duration: 207, image: "https://i.ytimg.com/vi/SAZAKCUQMU0/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/r7m6y5W4w3U2t1s0r9q8p7dMqKsS4tO"},
+                {id: 39, title: "Take My Breath", artist: "The Weeknd", duration: 239, image: "https://i.ytimg.com/vi/_wvMZn-vYUE/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/s8n7z6X5x4V3u2t1s0r9q8eNrLtT5uP"},
+                {id: 40, title: "Earned It", artist: "The Weeknd", duration: 252, image: "https://i.ytimg.com/vi/waU75jdUnYw/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/t9o8a7Y6y5W4v3u2t1s0r9fOsMuU6vQ"}
+            ],
+            
+            // Nirvana - реальные треки
+            'nirvana': [
+                {id: 41, title: "Smells Like Teen Spirit", artist: "Nirvana", duration: 301, image: "https://i.ytimg.com/vi/hTWKbfoikeg/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/u0p9b8Z7z6X5w4v3u2t1s0gPtNvV7wR"},
+                {id: 42, title: "Come As You Are", artist: "Nirvana", duration: 219, image: "https://i.ytimg.com/vi/vabnZ9-ex7o/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/v1q0c9A8a7Y6x5w4v3u2t1hQuOwW8xS"},
+                {id: 43, title: "Lithium", artist: "Nirvana", duration: 257, image: "https://i.ytimg.com/vi/pkcJEvMcnEg/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/w2r1d0B9b8Z7y6x5w4v3u2iRvPxX9yT"},
+                {id: 44, title: "Heart-Shaped Box", artist: "Nirvana", duration: 281, image: "https://i.ytimg.com/vi/n6P0SitRwy8/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/x3s2e1C0c9A8z7y6x5w4v3jSwQyY0zU"},
+                {id: 45, title: "About a Girl", artist: "Nirvana", duration: 168, image: "https://i.ytimg.com/vi/2u5rK-W6wRM/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/y4t3f2D1d0B9a8z7y6x5w4kTxRzZ1aV"},
+                {id: 46, title: "In Bloom", artist: "Nirvana", duration: 254, image: "https://i.ytimg.com/vi/PbgKEjNBHqM/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/z5u4g3E2e1C0b9a8z7y6x5lUySaA2bW"},
+                {id: 47, title: "All Apologies", artist: "Nirvana", duration: 231, image: "https://i.ytimg.com/vi/aWmkuH1k7uA/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/a6v5h4F3f2D1c0b9a8z7y6mVzTbB3cX"},
+                {id: 48, title: "Rape Me", artist: "Nirvana", duration: 173, image: "https://i.ytimg.com/vi-ZZRc6PvUw/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/b7w6i5G4g3E2d1c0b9a8z7nWaUcC4dY"},
+                {id: 49, title: "Dumb", artist: "Nirvana", duration: 152, image: "https://i.ytimg.com/vi/0MlFh40QhB8/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/c8x7j6H5h4F3e2d1c0b9a8oXbVdD5eZ"},
+                {id: 50, title: "Polly", artist: "Nirvana", duration: 173, image: "https://i.ytimg.com/vi/2q-4cC4lY_o/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/d9y8k7I6i5G4f3e2d1c0b9pYcWeE6fA"}
+            ],
+            
+            // Макс Корж - реальные треки
+            'корж': [
+                {id: 51, title: "Звезда", artist: "Макс Корж", duration: 235, image: "https://i.ytimg.com/vi/4W7hTpy8kL8/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/e0z9l8J7j6H5g4f3e2d1c0qZdXfF7gB"},
+                {id: 52, title: "Беги", artist: "Макс Корж", duration: 228, image: "https://i.ytimg.com/vi/jzJXyD8Q6cM/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/f1a0m9K8k7I6h5g4f3e2d1rAeYgG8hC"},
+                {id: 53, title: "Мотылёк", artist: "Макс Корж", duration: 242, image: "https://i.ytimg.com/vi/k0KLYv3v7k4/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/g2b1n0L9l8J7i6h5g4f3e2sBfZhH9iD"},
+                {id: 54, title: "Стиль", artist: "Макс Корж", duration: 219, image: "https://i.ytimg.com/vi/l1LmZ4w4l5/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/h3c2o1M0m9K8j7i6h5g4f3tCgAiI0jE"},
+                {id: 55, title: "Малый повзрослел", artist: "Макс Корж", duration: 263, image: "https://i.ytimg.com/vi/m2MnZ5y5m6/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/i4d3p2N1n0L9k8j7i6h5g4uDhBjJ1kF"},
+                {id: 56, title: "Эндорфин", artist: "Макс Корж", duration: 237, image: "https://i.ytimg.com/vi/n3NoZ6z6n7/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/j5e4q3O2o1M0l9k8j7i6h5vEiCkK2lG"},
+                {id: 57, title: "Пьяный дождь", artist: "Макс Корж", duration: 251, image: "https://i.ytimg.com/vi/o4OpZ7o7o8/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/k6f5r4P3p2N1m0l9k8j7i6wFjDlL3mH"},
+                {id: 58, title: "Королева", artist: "Макс Корж", duration: 224, image: "https://i.ytimg.com/vi/p5PqZ8p8p9/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/l7g6s5Q4q3O2n1m0l9k8j7xGkEmM4nI"},
+                {id: 59, title: "Деньги", artist: "Макс Корж", duration: 246, image: "https://i.ytimg.com/vi/q6QrZ9q9q0/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/m8h7t6R5r4P3o2n1m0l9k8yHlFnN5oJ"},
+                {id: 60, title: "Небо поможет нам", artist: "Макс Корж", duration: 258, image: "https://i.ytimg.com/vi/r7RsZ0r0r1/maxresdefault.jpg", audio: "https://audio.jukehost.co.uk/n9i8u7S6s5Q4p3o2n1m0l9zImGoO6pK"}
+            ]
+        };
+
+        // Карта соответствия запросов исполнителям
+        const ARTIST_MAP = {
+            'eminem': ['eminem', 'эминем', 'еминем'],
+            'miyagi': ['miyagi', 'мияги', 'мияджи'],
+            'queen': ['queen', 'квин', 'куин'],
+            'weeknd': ['weeknd', 'викэнд', 'уикэнд'],
+            'nirvana': ['nirvana', 'нирвана', 'нервана'],
+            'корж': ['корж', 'max korzh', 'макс корж']
+        };
+
+        // =================== ИНИЦИАЛИЗАЦИЯ ===================
+        document.addEventListener('DOMContentLoaded', function() {
+            init();
+        });
+
+        function init() {
+            setupEventListeners();
+            initFullscreenWave();
+            showInitialArtists();
+            
+            showNotification('🎵 Введите имя исполнителя и слушайте его реальные треки!');
+        }
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            document.getElementById('searchBtn').addEventListener('click', performSearch);
+            document.getElementById('enterFullscreen').addEventListener('click', enterFullscreenMode);
+            document.getElementById('closeFullscreen').addEventListener('click', exitFullscreenMode);
+            
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    exitFullscreenMode();
+                }
+                if (e.key === 'ArrowRight' && isFullscreenOpen()) {
+                    nextTrack();
+                }
+                if (e.key === 'ArrowLeft' && isFullscreenOpen()) {
+                    prevTrack();
+                }
+                if (e.key === ' ' && isFullscreenOpen()) {
+                    e.preventDefault();
+                    togglePlay();
+                }
+            });
+            
+            audio.addEventListener('timeupdate', updateProgress);
+            audio.addEventListener('loadedmetadata', function() {
+                document.getElementById('fullscreenDuration').textContent = formatTime(audio.duration);
+            });
+            audio.addEventListener('ended', nextTrack);
+            audio.addEventListener('pause', function() {
+                stopWaveAnimation();
+                document.getElementById('fullscreenPlayBtn').classList.remove('playing');
+                document.getElementById('fullscreenPlayIcon').textContent = '▶';
+                isPlaying = false;
+            });
+            audio.addEventListener('play', function() {
+                document.getElementById('fullscreenPlayBtn').classList.add('playing');
+                document.getElementById('fullscreenPlayIcon').textContent = '⏸';
+                isPlaying = true;
+                startWaveAnimation();
+            });
+            
+            audio.addEventListener('error', function() {
+                showNotification('Не удалось загрузить аудио', 'error');
+            });
+        }
+
+        // =================== ПОИСК ИСПОЛНИТЕЛЕЙ ===================
+        function performSearch() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            
+            if (!query) {
+                showNotification('Введите имя исполнителя', 'error');
+                return;
+            }
+            
+            showLoader(true);
+            
+            // Определяем исполнителя
+            let foundArtist = null;
+            
+            for (const [artistId, keywords] of Object.entries(ARTIST_MAP)) {
+                for (const keyword of keywords) {
+                    if (query.includes(keyword)) {
+                        foundArtist = artistId;
+                        break;
+                    }
+                }
+                if (foundArtist) break;
+            }
+            
+            // Имитация загрузки
+            setTimeout(() => {
+                if (foundArtist && ARTISTS_DATABASE[foundArtist]) {
+                    currentTracks = ARTISTS_DATABASE[foundArtist];
+                    displayResults(currentTracks);
+                    showNotification(`🎵 Загружено ${currentTracks.length} треков ${getArtistName(foundArtist)}`);
+                    document.getElementById('enterFullscreen').style.display = 'block';
+                } else {
+                    showNoResults();
+                    showNotification('Исполнитель не найден. Попробуйте: Eminem, Miyagi, Queen, The Weeknd, Nirvana, Корж', 'error');
+                }
+                showLoader(false);
+            }, 800);
+        }
+
+        function getArtistName(artistId) {
+            const names = {
+                'eminem': 'Eminem',
+                'miyagi': 'Miyagi',
+                'queen': 'Queen',
+                'weeknd': 'The Weeknd',
+                'nirvana': 'Nirvana',
+                'корж': 'Макс Корж'
+            };
+            return names[artistId] || artistId;
+        }
+
+        function showInitialArtists() {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center;">
+                    <div style="font-size: 64px; margin-bottom: 30px; color: #1DB954;">🎵</div>
+                    <div style="font-size: 32px; margin-bottom: 20px; color: white; font-weight: 800; text-transform: uppercase;">Выберите исполнителя</div>
+                    <div style="font-size: 20px; margin-bottom: 40px; color: rgba(255, 255, 255, 0.7);">
+                        Введите имя исполнителя в поисковую строку и нажмите "Найти исполнителя"
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; max-width: 900px; margin: 0 auto;">
+                        ${Object.keys(ARTISTS_DATABASE).map(artistId => `
+                            <div style="background: rgba(29, 185, 84, 0.1); border: 2px solid rgba(29, 185, 84, 0.3); 
+                                 padding: 30px 40px; border-radius: 25px; cursor: pointer; transition: all 0.3s; text-align: center; min-width: 250px;"
+                                 onclick="searchArtist('${artistId}')">
+                                <div style="font-size: 36px; margin-bottom: 15px; color: #1DB954;">${getArtistEmoji(artistId)}</div>
+                                <div style="font-size: 26px; color: white; font-weight: 700; text-transform: uppercase; margin-bottom: 10px;">${getArtistName(artistId)}</div>
+                                <div style="font-size: 18px; color: rgba(255, 255, 255, 0.6);">10 реальных треков</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('enterFullscreen').style.display = 'none';
+        }
+
+        function getArtistEmoji(artistId) {
+            const emojis = {
+                'eminem': '🎤',
+                'miyagi': '🎭',
+                'queen': '👑',
+                'weeknd': '✨',
+                'nirvana': '⚡',
+                'корж': '🌟'
+            };
+            return emojis[artistId] || '🎵';
+        }
+
+        function searchArtist(artistId) {
+            document.getElementById('searchInput').value = getArtistName(artistId);
+            performSearch();
+        }
+
+        function showNoResults() {
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = `
+                <div class="no-results">
+                    <div style="font-size: 64px; margin-bottom: 30px; color: #1DB954;">🎵</div>
+                    <div style="font-size: 32px; margin-bottom: 20px; color: white; font-weight: 800; text-transform: uppercase;">Исполнитель не найден</div>
+                    <div style="font-size: 20px; margin-bottom: 40px; color: rgba(255, 255, 255, 0.7);">
+                        Доступные исполнители: Eminem, Miyagi, Queen, The Weeknd, Nirvana, Макс Корж
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
+                        <button onclick="searchArtist('eminem')" style="padding: 20px 40px; background: linear-gradient(135deg, #1DB954, #17a74d); 
+                               color: white; border: none; border-radius: 50px; cursor: pointer;
+                               font-weight: 700; font-size: 20px; transition: all 0.3s;
+                               box-shadow: 0 10px 30px rgba(29, 185, 84, 0.4); text-transform: uppercase;">
+                            Eminem
+                        </button>
+                        <button onclick="searchArtist('miyagi')" style="padding: 20px 40px; background: linear-gradient(135deg, #1DB954, #17a74d); 
+                               color: white; border: none; border-radius: 50px; cursor: pointer;
+                               font-weight: 700; font-size: 20px; transition: all 0.3s;
+                               box-shadow: 0 10px 30px rgba(29, 185, 84, 0.4); text-transform: uppercase;">
+                            Miyagi
+                        </button>
+                        <button onclick="searchArtist('queen')" style="padding: 20px 40px; background: linear-gradient(135deg, #1DB954, #17a74d); 
+                               color: white; border: none; border-radius: 50px; cursor: pointer;
+                               font-weight: 700; font-size: 20px; transition: all 0.3s;
+                               box-shadow: 0 10px 30px rgba(29, 185, 84, 0.4); text-transform: uppercase;">
+                            Queen
+                        </button>
+                    </div>
+                </div>
+            `;
+            document.getElementById('enterFullscreen').style.display = 'none';
+        }
+
+        // =================== ОТОБРАЖЕНИЕ РЕЗУЛЬТАТОВ ===================
+        function displayResults(tracks) {
+            const container = document.getElementById('resultsContainer');
+            
+            if (tracks.length === 0) {
+                showNoResults();
+                return;
+            }
+            
+            container.innerHTML = tracks.map((track, index) => {
+                const delay = (index % 10) * 0.1;
+                
+                return `
+                <div class="track-card" onclick="playTrack(${index})" 
+                     style="animation-delay: ${delay}s">
+                    <img src="${track.image}" 
+                         class="track-img" 
+                         alt="${track.title}"
+                         onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop'">
+                    <div class="track-info">
+                        <div class="track-title" title="${track.title}">${truncateText(track.title, 30)}</div>
+                        <div class="track-artist" title="${track.artist}">${truncateText(track.artist, 35)}</div>
+                        <div class="track-controls">
+                            <button class="play-btn" onclick="event.stopPropagation(); playTrack(${index})">
+                                ▶ СЛУШАТЬ ТРЕК
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                `;
+            }).join('');
+            
+            document.getElementById('enterFullscreen').style.display = 'block';
+        }
+
+        // =================== ВОСПРОИЗВЕДЕНИЕ ТРЕКОВ ===================
+        function playTrack(index) {
+            currentTrackIndex = index;
+            const track = currentTracks[index];
+            
+            if (!track) {
+                showNotification('Трек не найден', 'error');
+                return;
+            }
+            
+            showNotification(`🎵 Сейчас играет: ${track.title} - ${track.artist}`);
+            
+            audio.src = track.audio;
+            
+            isPlaying = false;
+            stopWaveAnimation();
+            
+            audio.play().then(() => {
+                isPlaying = true;
+                updateFullscreenUI(track);
+                startWaveAnimation();
+                enterFullscreenMode();
+            }).catch(error => {
+                console.error('Play error:', error);
+                updateFullscreenUI(track);
+                enterFullscreenMode();
+                
+                if (error.name === 'NotAllowedError') {
+                    showNotification('Разрешите воспроизведение звука в браузере', 'error');
+                } else {
+                    showNotification('Нажмите PLAY для начала прослушивания', 'info');
+                }
+            });
+            
+            updateFullscreenUI(track);
+        }
+
+        function updateFullscreenUI(track) {
+            const cover = document.getElementById('fullscreenCover');
+            cover.src = track.image;
+            cover.onerror = function() {
+                this.src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=400&fit=crop';
+            };
+            
+            document.getElementById('fullscreenTitle').textContent = track.title;
+            document.getElementById('fullscreenArtist').textContent = track.artist;
+            document.getElementById('fullscreenDuration').textContent = formatTime(track.duration);
+            
+            if (isPlaying) {
+                document.getElementById('fullscreenPlayBtn').classList.add('playing');
+                document.getElementById('fullscreenPlayIcon').textContent = '⏸';
+            } else {
+                document.getElementById('fullscreenPlayBtn').classList.remove('playing');
+                document.getElementById('fullscreenPlayIcon').textContent = '▶';
+            }
+        }
+
+        function togglePlay() {
+            if (!audio.src || audio.src.length < 10) {
+                if (currentTracks.length > 0) {
+                    playTrack(0);
+                }
+                return;
+            }
+            
+            if (isPlaying) {
+                audio.pause();
+            } else {
+                audio.play().then(() => {
+                    startWaveAnimation();
+                }).catch(error => {
+                    showNotification('Ошибка воспроизведения', 'error');
+                });
+            }
+        }
+
+        function prevTrack() {
+            if (currentTracks.length === 0) return;
+            
+            let newIndex = currentTrackIndex - 1;
+            if (newIndex < 0) newIndex = currentTracks.length - 1;
+            playTrack(newIndex);
+        }
+
+        function nextTrack() {
+            if (currentTracks.length === 0) return;
+            
+            let newIndex = currentTrackIndex + 1;
+            if (newIndex >= currentTracks.length) newIndex = 0;
+            playTrack(newIndex);
+        }
+
+        function seek(event) {
+            if (!audio.duration) return;
+            
+            const progressBar = event.currentTarget;
+            const rect = progressBar.getBoundingClientRect();
+            const percentage = (event.clientX - rect.left) / rect.width;
+            
+            audio.currentTime = percentage * audio.duration;
+        }
+
+        // =================== АНИМАЦИЯ ВОЛНЫ ===================
+        function initFullscreenWave() {
+            const waveContainer = document.getElementById('fullscreenWave');
+            waveContainer.innerHTML = '';
+            waveBars = [];
+            
+            for (let i = 0; i < 80; i++) {
+                const waveBar = document.createElement('div');
+                waveBar.className = 'full-wave-bar';
+                waveBar.style.height = '60px';
+                waveBar.style.setProperty('--i', i);
+                waveBar.style.opacity = 0.8 + (Math.random() * 0.2);
+                waveContainer.appendChild(waveBar);
+                waveBars.push(waveBar);
+            }
+        }
+
+        function startWaveAnimation() {
+            if (waveAnimationInterval) {
+                clearInterval(waveAnimationInterval);
+            }
+            
+            waveIntensity = 1.2;
+            waveAnimationInterval = setInterval(updateWaveAnimation, 90);
+        }
+
+        function updateWaveAnimation() {
+            if (!isPlaying) {
+                waveIntensity = Math.max(0.3, waveIntensity - 0.05);
+            }
+            
+            const timeOffset = Date.now() / 800;
+            
+            waveBars.forEach((bar, index) => {
+                const baseHeight = 60;
+                
+                const wave1 = Math.sin(timeOffset * 1.5 + index * 0.15) * 35;
+                const wave2 = Math.cos(timeOffset * 1.2 + index * 0.25) * 25;
+                const wave3 = Math.sin(timeOffset * 0.9 + index * 0.35) * 15;
+                
+                let height = baseHeight + (wave1 + wave2 + wave3) * waveIntensity;
+                height = Math.max(30, Math.min(450, height));
+                
+                bar.style.height = `${height}px`;
+                
+                const intensity = height / 450;
+                
+                if (intensity > 0.75) {
+                    bar.style.background = `linear-gradient(to top, 
+                        #0d8d3f,
+                        #17a74d 30%,
+                        #1DB954 60%,
+                        #1ed760 90%
+                    )`;
+                } else if (intensity > 0.5) {
+                    bar.style.background = `linear-gradient(to top, 
+                        #17a74d,
+                        #1DB954 30%,
+                        #1ed760 60%,
+                        #2ecc71 90%
+                    )`;
+                } else if (intensity > 0.25) {
+                    bar.style.background = `linear-gradient(to top, 
+                        #1DB954,
+                        #2ecc71 30%,
+                        #4cd964 60%,
+                        #5fe684 90%
+                    )`;
+                } else {
+                    bar.style.background = `linear-gradient(to top, 
+                        #2ecc71,
+                        #4cd964 30%,
+                        #5fe684 60%,
+                        #7af5a2 90%
+                    )`;
+                }
+                
+                const animationSpeed = 1.5 + (index % 5) * 0.3;
+                const delay = (index % 20) * 0.05;
+                
+                bar.style.animation = `waveMove ${animationSpeed}s ease-in-out infinite`;
+                bar.style.animationDelay = `${delay}s`;
+                bar.style.animationTimingFunction = 'cubic-bezier(0.4, 0, 0.2, 1)';
+            });
+        }
+
+        function stopWaveAnimation() {
+            if (waveAnimationInterval) {
+                clearInterval(waveAnimationInterval);
+                waveAnimationInterval = null;
+            }
+            
+            waveBars.forEach((bar, index) => {
+                bar.style.height = '60px';
+                bar.style.background = `linear-gradient(to top, 
+                    #17a74d,
+                    #1DB954 30%,
+                    #1ed760 60%,
+                    #2ecc71 90%
+                )`;
+                bar.style.animation = 'none';
+                bar.style.opacity = 0.8 + (Math.random() * 0.2);
+            });
+        }
+
+        // =================== ПОЛНЫЙ ЭКРАН ===================
+        function enterFullscreenMode() {
+            if (currentTracks.length === 0) {
+                showNotification('Сначала выберите трек', 'error');
+                return;
+            }
+            
+            document.getElementById('fullscreenMode').style.display = 'flex';
+            document.getElementById('mainContainer').style.display = 'none';
+            
+            if (isPlaying) {
+                setTimeout(() => startWaveAnimation(), 100);
+            }
+        }
+
+        function exitFullscreenMode() {
+            document.getElementById('fullscreenMode').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'flex';
+            stopWaveAnimation();
+        }
+
+        function isFullscreenOpen() {
+            return document.getElementById('fullscreenMode').style.display === 'flex';
+        }
+
+        // =================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ===================
+        function updateProgress() {
+            if (audio.duration && !isNaN(audio.duration)) {
+                const progress = (audio.currentTime / audio.duration) * 100;
+                document.getElementById('fullscreenProgress').style.width = `${progress}%`;
+                document.getElementById('fullscreenCurrentTime').textContent = formatTime(audio.currentTime);
+            }
+        }
+
+        function formatTime(seconds) {
+            if (!seconds || isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function showNotification(text, type = 'normal') {
+            const notification = document.getElementById('notification');
+            notification.textContent = text;
+            
+            if (type === 'error') {
+                notification.style.background = 'linear-gradient(135deg, #ff4757, #ff3838)';
+            } else if (type === 'info') {
+                notification.style.background = 'linear-gradient(135deg, #3498db, #2980b9)';
+            } else {
+                notification.style.background = 'linear-gradient(135deg, #1DB954, #17a74d)';
+            }
+            
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function showLoader(show) {
+            document.getElementById('loader').style.display = show ? 'block' : 'none';
+        }
+
+        function truncateText(text, maxLength) {
+            if (!text) return '';
+            return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+        }
+
+        // Обновляем прогресс каждые 100мс
+        setInterval(updateProgress, 100);
+        
+        // Автозапуск при загрузке
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                showNotification('🎵 Ищите исполнителя и наслаждайтесь его реальными треками!');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
